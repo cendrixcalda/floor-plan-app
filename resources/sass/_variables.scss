@@ -1,0 +1,53 @@
+// Body
+$body-bg: #f8fafc;
+
+// Typography
+$font-family-sans-serif: "Nunito", sans-serif;
+$font-size-base: 0.9rem;
+$line-height-base: 1.6;
+
+// Colors
+$priColor: #265bfb;
+$secColor: #fff;
+$terColor: #222;
+$lightGray: #d9d9d9;
+$shadowColor: #f9f9f9;
+$inactivePriColor: #265bfb86;
+
+$successColor: #34e660;
+$warningColor: #f1aa10;
+$errorColor: #e95e51;
+
+// Mixins
+@mixin flexCenteredX {
+    display: flex;
+    justify-content: center;
+}
+
+@mixin flexCenteredY {
+    display: flex;
+    align-items: center;
+}
+
+@mixin flexCenteredXY {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@mixin card {
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+// Animations
+@keyframes fadeElement {
+    to {
+        width: 0;
+        height: 0;
+        padding: 0;
+        margin: 0;
+        visibility: hidden;
+    }
+}
