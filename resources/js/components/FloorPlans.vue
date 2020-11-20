@@ -38,7 +38,7 @@
 }
 
 .file-inputs {
-  padding: 4px 3px 0 !important;
+  padding: 0px 5px !important;
 }
 
 .file-count-col {
@@ -63,7 +63,7 @@
     min-height: 90vh;
     overflow-y: auto;
     background: $secColor;
-    padding: 20px 10px 10px;
+    padding: 30px 15px 10px;
 
     .preview-section {
       margin-bottom: 30px;
@@ -102,7 +102,7 @@
     max-width: 900px;
     background: $secColor;
     padding: 5px;
-    border-bottom: 1px solid $lightGray;
+    border-bottom: 2px solid $priColor;
 
     .close:before {
       content: "✕";
@@ -168,6 +168,8 @@
 .custom-file {
   z-index: 0;
   overflow: hidden;
+  position: relative;
+  top: 3px;
 
   .custom-file-input {
     &:focus ~ .custom-file-label,
@@ -261,7 +263,7 @@
             @click="
               switchMode(false),
                 setSearchData(),
-                getFloorPlans(),
+                getFloorPlans(pagination.path + '?page=' + pagination.currentPage),
                 clearFirstRow()
             "
           >
@@ -285,8 +287,14 @@
               v-model.trim="tableData.search[column]"
               @input="getFloorPlans()"
               autofocus
+              v-if="!sliderColumns.includes(column)"
+              v-on="numberDotColumns.includes(column) ? { keypress: ($event) => numberDotOnly($event) } : {}"
             />
+            <div class="per-level" v-if="column == 'area'"><vue-slider v-model="areaMinMax" :min="0" :max="areaMax" tooltipPlacement="bottom" @change="getFloorPlans(), tableData.search.area = areaMinMax"></vue-slider></div>
+            <div class="per-level" v-if="column == 'length'"><vue-slider v-model="lengthMinMax" :min="0" :max="lengthMax" tooltipPlacement="bottom" @change="getFloorPlans(), tableData.search.length = lengthMinMax"></vue-slider></div>
+            <div class="per-level" v-if="column == 'width'"><vue-slider v-model="widthMinMax" :min="0" :max="widthMax" tooltipPlacement="bottom" @change="getFloorPlans(), tableData.search.width = widthMinMax"></vue-slider></div>
           </td>
+          <td></td>
           <td></td>
           <td></td>
           <td></td>
@@ -313,7 +321,12 @@
               @input="objEmptyPropertyRemover(insertData)"
               v-model.trim="insertData[column]"
               autofocus
+              v-if="!autocomputedColumns.includes(column)"
+              v-on="numberDotColumns.includes(column) ? { keypress: ($event) => numberDotOnly($event) } : {}"
             />
+            <div class="per-level" v-if="column == 'bedroom_per_level'">{{ numberFormat(bedroomPerLevel) }}</div>
+            <div class="per-level" v-if="column == 'living_per_level'">{{ numberFormat(livingPerLevel) }}</div>
+            <div class="per-level" v-if="column == 'bathroom_per_level'">{{ numberFormat(bathroomPerLevel) }}</div>
           </td>
           <td class="file-inputs">
             <div class="custom-file">
@@ -349,6 +362,22 @@
               }}</label>
             </div>
           </td>
+          <td class="file-inputs">
+            <div class="custom-file">
+              <input
+                type="file"
+                ref="files"
+                class="custom-file-input"
+                id="files"
+                multiple
+                v-if="fileShow"
+                @change="saveFiles()"
+              />
+              <label class="custom-file-label" for="files">{{
+               fileUploadLabel()
+              }}</label>
+            </div>
+          </td>
           <td>
             <button type="button" class="options" @click="insertFloorPlan()">
               <i class="fas fa-plus"></i>
@@ -379,10 +408,13 @@
               v-model.trim="floorPlan[key]"
               @focus="previousValue = value"
               @blur="updateFloorPlan(floorPlan.id, key, value)"
+              :readonly="autocomputedColumns.includes(key)"
+              v-on="numberDotColumns.includes(key) ? { keypress: ($event) => numberDotOnly($event) } : {}"
             />
           </td>
-          <td class="file-count-col">{{ floorPlan.house_image.length ? floorPlan.house_image.length + ' images' : 'no image' }}</td>
-          <td class="file-count-col">{{ floorPlan.floor_plan_image.length ? floorPlan.floor_plan_image.length + ' images' : 'no image' }}</td>
+          <td class="file-count-col">{{ floorPlan.house_image.length ? floorPlan.house_image.length + ' image/s' : 'No image' }}</td>
+          <td class="file-count-col">{{ floorPlan.floor_plan_image.length ? floorPlan.floor_plan_image.length + ' image/s' : 'No image' }}</td>
+          <td class="file-count-col">{{ floorPlan.file.length ? floorPlan.file.length + ' file/s' : 'No file' }}</td>
           <td>
             <button type="button" class="options" @click="viewFloorPlanPreview(floorPlan.id)">
               <i class="fas fa-eye"></i>
@@ -427,7 +459,7 @@
             <div class="preview-section-title">
               House Images
             </div>
-            <div class="preview-section-images">
+            <div class="preview-section-images" v-if="selectedFloorPlan.house_image.length">
               <div
               class="preview-section-image-container"
                 v-for="(houseImage, index) in selectedFloorPlan.house_image"
@@ -435,13 +467,16 @@
                 <img :src="'images/house_images/' + houseImage['title']" />
               </div>
             </div>
+            <div class="px-3" v-else>
+              No image
+            </div>
           </div>
 
           <div class="preview-section">
             <div class="preview-section-title">
               Floor Plan Images
             </div>
-            <div class="preview-section-images">
+            <div class="preview-section-images" v-if="selectedFloorPlan.floor_plan_image.length">
               <div
                 class="preview-section-image-container"
                 v-for="(floorPlanImage, index) in selectedFloorPlan.floor_plan_image"
@@ -449,7 +484,30 @@
                 <img :src="'images/floor_plan_images/' + floorPlanImage['title']" />
               </div>
             </div>
+            <div class="px-3" v-else>
+              No image
+            </div>
           </div>
+
+          <div class="preview-section">
+            <div class="preview-section-title">
+              Files
+            </div>
+            <div class="preview-section-images">
+              <div v-if="selectedFloorPlan.file.length">
+                <div
+                  class="px-3"
+                  v-for="(file, index) in selectedFloorPlan.file"
+                  :key="index">
+                  <a :href="'files/' + file['title']" download>{{ file['title'] }}</a>
+                </div>
+              </div>
+              <div class="px-3" v-else>
+                No file
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </transition>
@@ -460,12 +518,14 @@
 import NotificationsOverlay from "./Notifications-Overlay";
 import Datatable from "./Datatable.vue";
 import Pagination from "./Pagination.vue";
+import VueSlider from 'vue-slider-component'
 
 export default {
   components: {
     "notifications-overlay": NotificationsOverlay,
     datatable: Datatable,
     pagination: Pagination,
+    "vue-slider": VueSlider,
   },
   data() {
     return {
@@ -482,17 +542,56 @@ export default {
       insertData: {},
       houseImages: [],
       floorPlanImages: [],
-      autocadFiles: [],
-      excludedColumns: ["id", "house_image", "floor_plan_image", "autocadFile", "created_at", "updated_at", "deleted_at"],
+      files: [],
+      excludedColumns: [
+        "id", 
+        "house_image", 
+        "floor_plan_image", 
+        "file",
+        "created_at", 
+        "updated_at", 
+        "deleted_at"
+      ],
       excludedFirstRowColumns: [
         "id",
         "house_images",
         "floor_plan_images",
-        "autocadFiles",
+        "files",
         "created_at",
         "updated_at",
         "deleted_at",
       ],
+      numberDotColumns: [
+        "number_of_levels", 
+        "area", 
+        "length", 
+        "width",
+        "bedroom_per_level", 
+        "living_per_level", 
+        "bathroom_per_level", 
+        "carport_per_level",
+        "bedroom_per_building", 
+        "living_per_building", 
+        "bathroom_per_building", 
+        "carport_per_building",
+      ],
+      autocomputedColumns: [
+        "bedroom_per_level", 
+        "living_per_level", 
+        "bathroom_per_level", 
+      ],
+      sliderColumns: [
+        "area", 
+        "length", 
+        "width", 
+      ],
+      areaMax: 1,
+      lengthMax: 1,
+      widthMax: 1,
+      areaMinMax: [0, 1],
+      lengthMinMax: [0, 1],
+      widthMinMax: [0, 1],
+      firstFloorPlanCall: true,
       selectedFloorPlan: null,
       isSearching: true,
       notifCounter: 0,
@@ -510,13 +609,13 @@ export default {
       },
       houseImageShow: true,
       floorPlanImageShow: true,
-      autocadImageShow: true,
+      fileShow: true,
       showPreview: false,
     };
   },
   mounted() {
     this.getFloorPlanColumns();
-    this.getFloorPlans();
+    let data = this.getFloorPlans();
   },
   methods: {
     getFloorPlanColumns(url = "/get-floor-plan-columns") {
@@ -528,8 +627,8 @@ export default {
           this.setInsertData();
         })
         .catch((errors) => {
-          this.notifMessage =
-              "Error encountered while getting floor plan columns.";
+          this.notifMessage = 
+            "Error encountered while getting floor plan columns.";
           this.notifType = "error";
           this.notifCounter++;
         });
@@ -544,6 +643,19 @@ export default {
           if (this.tableData.requestCounter == data.requestCounter) {
             this.floorPlans = data.data.data;
             this.configPagination(data.data);
+
+            //set slider max value on first call
+            if(this.firstFloorPlanCall) {
+              this.setSliderMaxValues();
+
+              this.$nextTick(() => {
+                this.areaMinMax = [0, this.areaMax];
+                this.lengthMinMax = [0, this.lengthMax];
+                this.widthMinMax = [0, this.widthMax];
+              });
+
+              this.firstFloorPlanCall = false;
+            }
           }
         })
         .catch((errors) => {
@@ -583,6 +695,11 @@ export default {
           return;
       } else {
         Object.entries(this.insertData).forEach(([key, val]) => {
+          //validations
+          if(this.numberDotColumns.includes(key)){
+            val = val === '' || val === null || val === undefined ? '0.00' : this.numberFormat(val);
+          }
+
           formData.append("details[" + key + "]", JSON.stringify(val));
         });
 
@@ -593,11 +710,15 @@ export default {
         this.floorPlanImages.forEach((image, index) => {
           formData.append("floor_plan_images[" + index + "]", image);
         });
+
+        this.files.forEach((file, index) => {
+          formData.append("files[" + index + "]", file);
+        });
       }
 
-      // for (var pair of formData.entries()) {
-      //   console.log(pair[0] + ", " + pair[1]);
-      // }
+      for (var pair of formData.entries()) {
+        console.log(pair[0] + ", " + pair[1]);
+      }
 
       const config = {
         header: {
@@ -618,6 +739,7 @@ export default {
               this.getFloorPlans(
                 this.pagination.path + "?page=" + this.pagination.currentPage
               );
+              this.setSliderMaxValues();
             }
           }
         })
@@ -641,6 +763,7 @@ export default {
                 this.getFloorPlans(
                   this.pagination.path + "?page=" + this.pagination.currentPage
                 );
+                this.setSliderMaxValues();
               }
             }
           })
@@ -656,14 +779,19 @@ export default {
       this.selectedFloorPlan = this.floorPlans.find(element => { return element.id === id });
     },
     viewFloorPlanPreview(id) {
-      console.log(this.getSelectedFloorPlan(id));
       this.showPreview = true;
+      this.getSelectedFloorPlan(id);
     },
     closePreview() {
       this.showPreview = false;
     },
     updateFloorPlan(id, key, value, url = "/update-floor-plan") {
+      value = value === '' ? null : value; 
       if (value != this.previousValue) {
+        //validations
+        if(this.numberDotColumns.includes(key)){
+          value = value === '' || value === null || value === undefined ? '0.00' : this.numberFormat(value);
+        }
         axios
           .post(url, { id: id, key: key, value: value })
           .then((response) => {
@@ -676,6 +804,7 @@ export default {
                 this.getFloorPlans(
                   this.pagination.path + "?page=" + this.pagination.currentPage
                 );
+                this.setSliderMaxValues();
               }
             }
           })
@@ -710,6 +839,12 @@ export default {
         this.floorPlanImages.push(this.$refs.floor_plan_images.files[i]);
       }
     },
+    saveFiles() {
+      this.files = [];
+      for (var i = 0; i < this.$refs.files.files.length; i++) {
+        this.files.push(this.$refs.files.files[i]);
+      }
+    },
     filterArray(array, excludedElements) {
       return array.filter((element) => !excludedElements.includes(element));
     },
@@ -727,7 +862,9 @@ export default {
     clearFirstRow() {
       if (this.isSearching) {
         this.setSearchData();
-        this.getFloorPlans();
+        this.getFloorPlans(
+          this.pagination.path + "?page=" + this.pagination.currentPage
+        );
       } else {
         this.setInsertData();
         this.houseImageShow = false;
@@ -738,20 +875,50 @@ export default {
         this.$nextTick(() => {
           this.floorPlanImageShow = true;
         });
-        // this.autocadImageShow = false;
-        // this.$nextTick(() => {
-        //   this.autocadImageShow = true;
-        // });
+        this.fileShow = false;
+        this.$nextTick(() => {
+          this.fileShow = true;
+        });
 
         this.houseImages = [];
         this.floorPlanImages = [];
+        this.files = [];
       }
     },
     setSearchData() {
       this.tableData.search = {};
+      this.setSliderMaxValues();
+      this.$nextTick(() => {
+        this.areaMinMax = [0, this.areaMax];
+        this.lengthMinMax = [0, this.lengthMax];
+        this.widthMinMax = [0, this.widthMax];
+      });
     },
     setInsertData() {
       this.insertData = {};
+    },
+    getMaxValueFromArrayOfObject(arr, key){ 
+      var maxValue = 0; 
+      for(var i = 0; i < arr.length; i++){
+          var currentValue = arr[i][key] === null || arr[i][key] === '' || arr[i][key] === undefined ? 0 : arr[i][key];
+          if(currentValue > maxValue){ 
+            maxValue = currentValue;
+          } 
+      } 
+      return maxValue; 
+    },
+    setSliderMaxValues() {
+      let areaMax = this.getMaxValueFromArrayOfObject(this.floorPlans, 'area');
+      let lengthMax = this.getMaxValueFromArrayOfObject(this.floorPlans, 'length');
+      let widthMax = this.getMaxValueFromArrayOfObject(this.floorPlans, 'width');
+
+      areaMax = parseInt(Math.ceil(areaMax/100)*100);
+      lengthMax = parseInt(Math.ceil(lengthMax/100)*100);
+      widthMax = parseInt(Math.ceil(widthMax/100)*100);
+
+      this.areaMax = areaMax > this.areaMax ? areaMax : this.areaMax;
+      this.lengthMax = lengthMax > this.lengthMax ? lengthMax : this.lengthMax;
+      this.widthMax = widthMax > this.widthMax ? widthMax : this.widthMax;
     },
     switchMode(value) {
       this.isSearching = value;
@@ -773,6 +940,106 @@ export default {
         : image.length === 1
         ? image[0].name
         : image.length + " images selected";
+    },
+    fileUploadLabel() {
+      let file = this.files;
+      return !file.length
+        ? "Choose file"
+        : file.length === 1
+        ? file[0].name
+        : file.length + " files selected";
+    },
+    numberDotOnly(evt) {
+      evt = (evt) ? evt : window.event;
+      var charCode = (evt.which) ? evt.which : evt.keyCode;
+      if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
+          evt.preventDefault()
+      } else {
+          return true
+      }
+    },
+    numberFormat(value) {
+      if(value) {
+        //convert to string
+        value = value.toString();
+
+        //remove unnecessary strings except dots
+        value = value.replace(/[^\d\.]/g, "")
+
+        //return value with only one dot
+        value = value.split('.');
+        value = value.shift() + '.' + value.join('');
+        
+        //return 2 decimal places(rounded)
+        value = parseFloat(Math.round(value * 100) / 100).toFixed(2);
+
+        return value;
+      }
+    },
+    numberComma(value) {
+      if(value) {
+        //number format, with commas evry thousand
+        let formatter = new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: 2,
+        });
+
+        return formatter.format(value);
+      }
+    },
+  },
+  computed: {
+    bedroomPerLevel: function (){
+        let bedroomPerLevel = 0.00
+        
+        bedroomPerLevel += this.insertData.bed_1 ? 1.00 : 0.00;
+        bedroomPerLevel += this.insertData.bed_2 ? 1.00 : 0.00;
+        bedroomPerLevel += this.insertData.bed_3 ? 1.00 : 0.00;
+        bedroomPerLevel += this.insertData.bedroom_4 ? 1.00 : 0.00;
+        bedroomPerLevel += this.insertData.bedroom_5 ? 1.00 : 0.00;
+
+        bedroomPerLevel = bedroomPerLevel > 0.00 ? bedroomPerLevel : '';
+        
+        if(bedroomPerLevel) this.insertData.bedroom_per_level = bedroomPerLevel;
+        else delete this.insertData.bedroom_per_level;
+
+        return bedroomPerLevel
+    },
+    livingPerLevel: function (){
+        let livingPerLevel = 0.00
+        
+        livingPerLevel += this.insertData.living_1 ? 1.00 : 0.00;
+        livingPerLevel += this.insertData.living_2 ? 1.00 : 0.00;
+        livingPerLevel += this.insertData.living_3 ? 1.00 : 0.00;
+
+        livingPerLevel = livingPerLevel > 0.00 ? livingPerLevel : '';
+
+        if(livingPerLevel) this.insertData.living_per_level = livingPerLevel;
+        else delete this.insertData.living_per_level;
+        
+        return livingPerLevel
+    },
+    bathroomPerLevel: function (){
+        let bathroomPerLevel = 0.00
+        
+        bathroomPerLevel += this.insertData.bathroom_1 ? 1.00 : 0.00;
+        bathroomPerLevel += this.insertData.bathroom_2 ? 1.00 : 0.00;
+        bathroomPerLevel += this.insertData.bathroom_3 ? 1.00 : 0.00;
+        bathroomPerLevel += this.insertData.bathroom_4 ? 1.00 : 0.00;
+        bathroomPerLevel += this.insertData.bathroom_5 ? 1.00 : 0.00;
+
+        bathroomPerLevel += this.insertData.guest_with_ensuite ? 1.00 : 0.00;
+        bathroomPerLevel += this.insertData.ensuite ? 1.00 : 0.00;
+        bathroomPerLevel += this.insertData.ensuite_2 ? 1.00 : 0.00;
+
+        bathroomPerLevel += this.insertData.WC ? 0.50 : 0.00;
+        bathroomPerLevel += this.insertData.WC_2 ? 0.50 : 0.00;
+
+        bathroomPerLevel = bathroomPerLevel > 0.00 ? bathroomPerLevel : '';
+
+        if(bathroomPerLevel) this.insertData.bathroom_per_level = bathroomPerLevel;
+        else delete this.insertData.bathroom_per_level;
+        
+        return bathroomPerLevel
     },
   },
 };

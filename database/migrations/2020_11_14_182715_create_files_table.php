@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAutocadFilesTable extends Migration
+class CreateFilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateAutocadFilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('autocad_files', function (Blueprint $table) {
+        Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->string('title')->required();
-            $table->integer('floor_plan_id');
+            $table->integer('floor_plan_id')->required();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +29,6 @@ class CreateAutocadFilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('autocad_files');
+        Schema::dropIfExists('files');
     }
 }

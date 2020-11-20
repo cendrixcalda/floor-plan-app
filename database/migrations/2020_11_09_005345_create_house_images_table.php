@@ -16,7 +16,7 @@ class CreateHouseImagesTable extends Migration
         Schema::create('house_images', function (Blueprint $table) {
             $table->id();
             $table->string('title')->required();
-            $table->integer('floor_plan_id');
+            $table->integer('floor_plan_id')->required();
             $table->timestamps();
             $table->softDeletes();
         });

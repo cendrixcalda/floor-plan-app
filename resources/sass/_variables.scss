@@ -13,10 +13,18 @@ $terColor: #222;
 $lightGray: #d9d9d9;
 $shadowColor: #f9f9f9;
 $inactivePriColor: #265bfb86;
+$priStripedColor: #052b9e;
 
 $successColor: #34e660;
 $warningColor: #f1aa10;
 $errorColor: #e95e51;
+
+//Vue slider theme
+$themeColor: #265bfb;
+@import "~vue-slider-component/lib/theme/default.scss";
+.vue-slider-dot {
+    z-index: 1 !important;
+}
 
 // Mixins
 @mixin flexCenteredX {

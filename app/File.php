@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AutocadFile extends Model
+class File extends Model
 {
     use SoftDeletes;
 
