@@ -47,6 +47,10 @@ main {
           top: -1px;
           z-index: 2;
 
+          &.medium-width {
+            min-width: 150px;
+          }
+
           &.long-width {
             min-width: 250px;
           }
@@ -102,7 +106,7 @@ main {
         <thead>
           <tr>
             <th
-              :class="{ 'long-width': longWidthColumns.includes(column), 'striped': stripedColumns.includes(column) }"
+              :class="{ 'medium-width': mediumWidthColumns.includes(column), 'long-width': longWidthColumns.includes(column), 'striped': stripedColumns.includes(column) }"
               v-for="column in columns"
               :key="column"
             >
@@ -128,7 +132,8 @@ export default {
   },
   data() {
     return {
-      longWidthColumns: ["area", "length", "width", "remarks", "house_images", "floor_plan_images", "files", "house_name"],
+      longWidthColumns: ["area", "length", "width", "remarks", "house_images", "floor_plan_images", "files", "house_name", "brand"],
+      mediumWidthColumns: ["tracking_id"],
       stripedColumns: [
         'tracking_id',
         'bathroom_2',

@@ -14,7 +14,7 @@ nav {
     outline: none;
     color: $terColor;
     white-space: nowrap;
-    padding: 15px 30px;
+    padding: 15px 20px;
     border-bottom: 3px solid $secColor;
 
     &.active {
@@ -48,7 +48,7 @@ nav {
       class="tab"
       :class="{ active: activeTab == 'user-management' }"
       @click="setNewActiveTab('user-management')"
-    >User Management</a>
+    >Users</a>
     <a href="/" class="tab tab-end">{{ logTitle }}</a>
   </nav>
 </template>

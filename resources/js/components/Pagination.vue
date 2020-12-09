@@ -48,6 +48,21 @@
     }
   }
 }
+
+@media (max-width: 470px) {
+  .pagination-container {
+    margin: 10px 0 20px;
+
+    .pagination {
+      flex-direction: column;
+      align-items: center;
+
+      .page-stats {
+        margin-bottom: 7px;
+      }
+    }
+  }
+}
 </style>
 
 <template>
@@ -56,19 +71,22 @@
       <span
         class="page-stats"
       >{{pagination.from ? pagination.from : 0}} - {{pagination.to ? pagination.to : 0}} of {{pagination.total}}</span>
-      <a @click="$emit('prev');" v-if="pagination.prevPageUrl">Previous</a>
-      <a class="disabled" v-else disabled>Previous</a>
+      
+      <div class="page-row">
+        <a @click="$emit('prev');" v-if="pagination.prevPageUrl">Prev</a>
+        <a class="disabled" v-else disabled>Prev</a>
 
-      <span
-        class="pages"
-        :class="{ active: pagination.currentPage == index }"
-        @click="$emit('index', index);"
-        v-for="index in pageLinks"
-        :key="index"
-      >{{ index }}</span>
+        <span
+          class="pages"
+          :class="{ active: pagination.currentPage == index }"
+          @click="$emit('index', index);"
+          v-for="index in pageLinks"
+          :key="index"
+        >{{ index }}</span>
 
-      <a @click="$emit('next');" v-if="pagination.nextPageUrl">Next</a>
-      <a class="disabled" v-else disabled>Next</a>
+        <a @click="$emit('next');" v-if="pagination.nextPageUrl">Next</a>
+        <a class="disabled" v-else disabled>Next</a>
+      </div>
     </div>
   </nav>
 </template>

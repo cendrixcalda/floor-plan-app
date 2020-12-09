@@ -11,26 +11,73 @@
     justify-content: space-between;
     width: 90%;
 
-    .mode {
+    .tools-right {
       display: flex;
-      border: 1px solid $lightGray;
 
-      button {
-        outline: none;
-        border: none;
-        margin: 0;
-        padding: 5px 15px;
-        background: $inactivePriColor;
-        color: $secColor;
+      & > * {
+        margin: 0 5px;
+      }
 
-        &:hover:not(.active),
-        &:focus:not(.active) {
-          box-shadow: 0 0 8px $priColor;
-        }
+      .show-on-desktop {
+        display: flex;
+      }
 
-        &.active {
-          background: $priColor;
+      .show-on-mobile {
+        display: none;
+      }
+
+      .edit {
+        display: flex;
+        border: 1px solid $lightGray;
+
+        button {
+          outline: none;
+          border: none;
+          margin: 0;
+          padding: 5px 15px;
+          background: $inactivePriColor;
           color: $secColor;
+
+          i {
+            padding: 5px 5px 5px 0 ;
+          }
+
+          &:hover {
+            box-shadow: 0 0 8px $priColor;
+          }
+
+          &.active {
+            background: $priColor;
+            color: $secColor;
+          }
+        }
+      }
+
+      .mode {
+        display: flex;
+        border: 1px solid $lightGray;
+
+        button {
+          outline: none;
+          border: none;
+          margin: 0;
+          padding: 5px 15px;
+          background: $inactivePriColor;
+          color: $secColor;
+
+          i {
+            padding: 5px 5px 5px 0 ;
+          }
+
+          &:hover:not(.active),
+          &:focus:not(.active) {
+            box-shadow: 0 0 8px $priColor;
+          }
+
+          &.active {
+            background: $priColor;
+            color: $secColor;
+          }
         }
       }
     }
@@ -57,6 +104,15 @@
   background: rgba(0, 0, 0, 0.3);
   padding: 10px;
 
+  button, a {
+    outline: none;
+    border: none;
+    background: transparent;
+    padding: 7px;
+    border-radius: 50%;
+    font-size: 17px;
+  }
+
   .preview {
     width: 100%;
     max-width: 900px;
@@ -82,13 +138,113 @@
           width: 100%;
           margin-bottom: 10px;
 
-          .preview-section-image-container {
+          .preview-section-image-container, .preview-new-image {
             width: 400px;
             margin: 5px auto;
+            position: relative;
+            background: $shadowColor;
+
+            .image-tools, .new-image-tools {
+              position: absolute;
+              top: 0;
+              left: 0;
+              display: none;
+              justify-content: flex-end;
+              width: 100%;
+              padding: 10px;
+              background: rgba(0, 0, 0, 0.3);
+
+              button, a {
+                color: $shadowColor;
+                margin: 0 3px;
+
+                &:hover,
+                &:focus {
+                  color: $priColor;
+                  background: $shadowColor;
+                }
+              }
+            }
+
+            .new-image-tools {
+              display: flex;
+              justify-content: space-between;
+
+              button {
+                padding: 5px 10px;
+                border-radius: 0;
+              }
+            }
 
             img {
               width: 100%;
               height: 250px;
+            }
+
+            .filename {
+              width: 100%;
+              height: 50px;
+              padding: 15px 10px;
+              white-space: nowrap;
+              overflow: hidden !important;
+              text-overflow: ellipsis !important;
+              background: rgba(0, 0, 0, 0.1);
+            }
+
+            .add-file {
+              @include flexCenteredY;
+              width: 100%;
+              height: 50px;
+              padding: 0 10px;
+              background: rgba(0, 0, 0, 0.1);
+
+              .custom-file {
+                margin-bottom: 6px;
+              }
+
+              button {
+                color: $terColor;
+                background: $shadowColor;
+                margin-left: 10px;
+
+                &.disabled {
+                  color: $lightGray;
+                }
+
+                &:not(.disabled):hover,
+                &:not(.disabled):focus {
+                  color: $priColor;
+                }
+              }
+            }
+
+            .preview-no-new-image {
+              @include flexCenteredXY;
+              width: 100%;
+              height: 250px;
+
+              button {
+                color: $terColor;
+                background: $secColor;
+
+                &:hover,
+                &:focus {
+                  color: $priColor;
+                }
+              }
+            }
+
+            .new-image-input {
+                display: none;
+            }
+            
+            &:hover .image-tools {
+              display: flex;
+            }
+
+            &:hover .filename {
+              background: rgb(126, 126, 126);
+              color: $secColor !important;
             }
           }
       }
@@ -198,18 +354,45 @@
 }
 
 @media (max-width: 470px) {
+
+  .show-on-desktop {
+    display: none !important;
+  }
+
+  .show-on-mobile {
+    display: flex !important;
+  }
+
+  .edit {
+    button {
+      padding: 5px 20px !important;
+      i {
+        padding: 0 !important;
+      }
+    }
+  }
+
+  .mode {
+    button {
+      padding: 5px 20px !important;
+      i {
+        padding: 0 !important;
+      }
+    }
+  }
+
   .preview-section-images {
     display: flex !important;
     flex-direction: column;
 
-    .preview-section-image-container {
+    .preview-section-image-container, .preview-new-image {
       width: 100% !important;
     }
   }
 }
 
 @media (max-width: 340px) {
-  .preview-section-image-container {
+  .preview-section-image-container, .preview-new-image {
     img {
       height: 200px !important;
     }
@@ -249,26 +432,42 @@
             </button>
           </div>
         </div>
-        <div class="mode">
-          <button
-            :class="{ active: isSearching }"
-            :disabled="isSearching"
-            @click="switchMode(true), clearFirstRow()"
-          >
-            Search
-          </button>
-          <button
-            :class="{ active: !isSearching }"
-            :disabled="!isSearching"
-            @click="
-              switchMode(false),
-                setSearchData(),
-                getFloorPlans(pagination.path + '?page=' + pagination.currentPage),
-                clearFirstRow()
-            "
-          >
-            Insert
-          </button>
+        <div class="tools-right">
+          <div class="mode" v-show="isEditing">
+            <button
+              title="Switch to search mode"
+              :class="{ active: isSearching }"
+              :disabled="isSearching"
+              @click="switchMode(true), clearFirstRow()"
+            >
+            <span class="show-on-desktop"><i class="fas fa-search"></i>Search</span>
+            <i class="fas fa-search show-on-mobile"></i>
+            </button>
+            <button
+              title="Switch to insert mode"
+              :class="{ active: !isSearching }"
+              :disabled="!isSearching"
+              @click="
+                switchMode(false),
+                  setSearchData(),
+                  getFloorPlans(pagination.path + '?page=' + pagination.currentPage),
+                  clearFirstRow()
+              "
+            >
+              <span class="show-on-desktop"><i class="fas fa-plus"></i>Insert</span>
+              <i class="fas fa-plus show-on-mobile"></i>
+            </button>
+          </div>
+          <div class="edit">
+            <button
+              :title="editTooltip"
+              :class="{ active: isEditing }"
+              @click="toggleIsEditing()"
+            >
+              <span class="show-on-desktop"><i class="fas fa-pen"></i>{{ isEditing ? 'Editing enabled' : 'Editing disabled' }}</span>
+              <i class="fas fa-pen show-on-mobile"></i>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -300,6 +499,7 @@
           <td></td>
           <td>
             <button
+              title="Clear all"
               type="button"
               class="options"
               :disabled="!Object.keys(tableData.search).length"
@@ -379,12 +579,13 @@
             </div>
           </td>
           <td>
-            <button type="button" class="options" @click="insertFloorPlan()">
+            <button title="Add new floor plan record" type="button" class="options" @click="insertFloorPlan()">
               <i class="fas fa-plus"></i>
             </button>
           </td>
           <td>
             <button
+              title="Clear all"
               type="button"
               class="options"
               :disabled="!Object.keys(insertData).length && !houseImages.length  && !floorPlanImages.length"
@@ -408,7 +609,7 @@
               v-model.trim="floorPlan[key]"
               @focus="previousValue = value"
               @blur="updateFloorPlan(floorPlan.id, key, value)"
-              :readonly="autocomputedColumns.includes(key)"
+              :readonly="!isEditing || autocomputedColumns.includes(key)"
               v-on="numberDotColumns.includes(key) ? { keypress: ($event) => numberDotOnly($event) } : {}"
             />
           </td>
@@ -416,14 +617,16 @@
           <td class="file-count-col">{{ floorPlan.floor_plan_image.length ? floorPlan.floor_plan_image.length + ' image/s' : 'No image' }}</td>
           <td class="file-count-col">{{ floorPlan.file.length ? floorPlan.file.length + ' file/s' : 'No file' }}</td>
           <td>
-            <button type="button" class="options" @click="viewFloorPlanPreview(floorPlan.id)">
+            <button title="View images and files" type="button" class="options" @click="viewFloorPlanPreview(floorPlan.id)">
               <i class="fas fa-eye"></i>
             </button>
           </td>
           <td>
             <button
+              title="Delete floor plan record"
               type="button"
               class="options"
+              :disabled="!isEditing"
               @click="deleteFloorPlan(floorPlan.id)"
             >
               <i class="fas fa-trash"></i>
@@ -461,14 +664,84 @@
             </div>
             <div class="preview-section-images" v-if="selectedFloorPlan.house_image.length">
               <div
-              class="preview-section-image-container"
+                class="preview-section-image-container"
                 v-for="(houseImage, index) in selectedFloorPlan.house_image"
-                :key="index">
+                :key="index"
+                >
+                <div 
+                  class="image-tools">
+                  <a
+                    class="fas fa-search-plus"
+                    title="View in full size"
+                    :href="'images/house_images/' + houseImage['title']"
+                    target="_blank"
+                  ></a>
+                  <a
+                    class="fas fa-arrow-alt-circle-down"
+                    title="Download image"
+                    :href="'images/house_images/' + houseImage['title']"
+                    download
+                  ></a>
+                  <button
+                    class="fas fa-trash"
+                    title="Delete image"
+                    @click="deleteHouseImage(houseImage.id, index)"
+                    v-show="isEditing"
+                  ></button>
+                </div>
                 <img :src="'images/house_images/' + houseImage['title']" />
+              </div>
+              <div class="preview-new-image" v-show="isEditing">
+                <input
+                  type="file"
+                  :ref="'newHouseImage'"
+                  class="custom-file-inputs new-image-input"
+                  :id="'newHouseImage'"
+                  accept="image/*"
+                  v-if="!newHouseImagePreview"
+                  @change="selectNewHouseImage()"
+                />
+                <div class="new-image-tools" v-if="newHouseImagePreview">
+                  <button @click="insertNewHouseImage(selectedFloorPlan.id)">save</button>
+                  <button @click="cancelNewHouseImage()">cancel</button>
+                </div>
+                <img :src="newHouseImagePreview" v-if="newHouseImagePreview"/>
+                <div class="preview-no-new-image" v-else>
+                  <button
+                    class="fas fa-plus"
+                    title="Add image"
+                    @click="$refs.newHouseImage.click()"
+                  ></button>
+                </div>
               </div>
             </div>
             <div class="px-3" v-else>
               No image
+            </div>
+            <div class="preview-section-images" v-if="!selectedFloorPlan.house_image.length && isEditing">
+              <div class="preview-new-image">
+                <input
+                  type="file"
+                  :ref="'newHouseImage'"
+                  class="custom-file-inputs new-image-input"
+                  :id="'newHouseImage'"
+                  accept="image/*"
+                  v-if="!newHouseImagePreview"
+                  @change="selectNewHouseImage()"
+                />
+                <div class="new-image-tools" v-if="newHouseImagePreview">
+                  <button @click="insertNewHouseImage(selectedFloorPlan.id)">save</button>
+                  <button @click="cancelNewHouseImage()">cancel</button>
+                </div>
+                <img :src="newHouseImagePreview" v-if="newHouseImagePreview"/>
+                <div class="preview-no-new-image" v-else>
+                  <button
+                    class="fas fa-plus"
+                    title="Add image"
+                    @click="$refs.newHouseImage.click()"
+                  ></button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -480,12 +753,82 @@
               <div
                 class="preview-section-image-container"
                 v-for="(floorPlanImage, index) in selectedFloorPlan.floor_plan_image"
-                :key="index">
+                :key="index"
+                >
+                <div
+                  class="image-tools">
+                  <a
+                    class="fas fa-search-plus"
+                    title="View in full size"
+                    :href="'images/floor_plan_images/' + floorPlanImage['title']"
+                    target="_blank"
+                  ></a>
+                  <a
+                    class="fas fa-arrow-alt-circle-down"
+                    title="Download image"
+                    :href="'images/floor_plan_images/' + floorPlanImage['title']"
+                    download
+                  ></a>
+                  <button
+                    class="fas fa-trash"
+                    title="Delete image"
+                    @click="deleteFloorPlanImage(floorPlanImage.id, index)"
+                    v-show="isEditing"
+                  ></button>
+                </div>
                 <img :src="'images/floor_plan_images/' + floorPlanImage['title']" />
+              </div>
+              <div class="preview-new-image" v-show="isEditing">
+                <input
+                  type="file"
+                  :ref="'newFloorPlanImage'"
+                  class="custom-file-inputs new-image-input"
+                  :id="'newFloorPlanImage'"
+                  accept="image/*"
+                  v-if="!newFloorPlanImagePreview"
+                  @change="selectNewFloorPlanImage()"
+                />
+                <div class="new-image-tools" v-if="newFloorPlanImagePreview">
+                  <button @click="insertNewFloorPlanImage(selectedFloorPlan.id)">save</button>
+                  <button @click="cancelNewFloorPlanImage()">cancel</button>
+                </div>
+                <img :src="newFloorPlanImagePreview" v-if="newFloorPlanImagePreview"/>
+                <div class="preview-no-new-image" v-else>
+                  <button
+                    class="fas fa-plus"
+                    title="Add image"
+                    @click="$refs.newFloorPlanImage.click()"
+                  ></button>
+                </div>
               </div>
             </div>
             <div class="px-3" v-else>
               No image
+            </div>
+            <div class="preview-section-images" v-if="!selectedFloorPlan.floor_plan_image.length && isEditing">
+              <div class="preview-new-image">
+                <input
+                  type="file"
+                  :ref="'newFloorPlanImage'"
+                  class="custom-file-inputs new-image-input"
+                  :id="'newFloorPlanImage'"
+                  accept="image/*"
+                  v-if="!newFloorPlanImagePreview"
+                  @change="selectNewFloorPlanImage()"
+                />
+                <div class="new-image-tools" v-if="newFloorPlanImagePreview">
+                  <button @click="insertNewFloorPlanImage(selectedFloorPlan.id)">save</button>
+                  <button @click="cancelNewFloorPlanImage()">cancel</button>
+                </div>
+                <img :src="newFloorPlanImagePreview" v-if="newFloorPlanImagePreview"/>
+                <div class="preview-no-new-image" v-else>
+                  <button
+                    class="fas fa-plus"
+                    title="Add image"
+                    @click="$refs.newFloorPlanImage.click()"
+                  ></button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -493,21 +836,84 @@
             <div class="preview-section-title">
               Files
             </div>
-            <div class="preview-section-images">
-              <div v-if="selectedFloorPlan.file.length">
-                <div
-                  class="px-3"
-                  v-for="(file, index) in selectedFloorPlan.file"
-                  :key="index">
-                  <a :href="'files/' + file['title']" download>{{ file['title'] }}</a>
+            <div class="preview-section-images" v-if="selectedFloorPlan.file.length">
+              <div
+                class="preview-section-image-container"
+                v-for="(file, index) in selectedFloorPlan.file"
+                :key="index">
+                  <div class="image-tools">
+                    <a
+                      class="fas fa-arrow-alt-circle-down"
+                      title="Download file"
+                      :href="'files/' + file['title']"
+                      download
+                    ></a>
+                    <button
+                      class="fas fa-trash"
+                      title="Delete file"
+                      @click="deleteNewFloorPlanFile(file.id, index)"
+                      v-show="isEditing"
+                    ></button>
+                  </div>
+                <div class="filename">{{ file['title'] }}</div>
+              </div>
+              <div class="preview-section-image-container" v-show="isEditing">
+                <div class="add-file">
+                  <div class="custom-file">
+                    <input
+                      type="file"
+                      ref="filesOnEdit"
+                      class="custom-file-input"
+                      id="files-on-edit"
+                      multiple
+                      v-if="fileOnEditShow"
+                      @change="saveFilesOnEdit()"
+                    />
+                    <label class="custom-file-label" for="files-on-edit">{{
+                    fileOnEditUploadLabel()
+                    }}</label>
+                  </div>
+                  <button
+                    class="fas fa-plus"
+                    :class="{ disabled: !filesOnEdit.length }"
+                    title="Upload file"
+                    @click="insertNewFloorPlanFile(selectedFloorPlan.id)"
+                    :disabled="!filesOnEdit.length"
+                  ></button>
                 </div>
               </div>
-              <div class="px-3" v-else>
-                No file
+            </div>
+            <div class="px-3 mb-3" v-else>
+              No file
+            </div>
+            <div class="preview-section-images" v-if="!selectedFloorPlan.file.length && isEditing">
+              <div class="preview-section-image-container">
+                <div class="add-file">
+                  <div class="custom-file">
+                    <input
+                      type="file"
+                      ref="filesOnEdit"
+                      class="custom-file-input"
+                      id="files-on-edit"
+                      multiple
+                      v-if="fileOnEditShow"
+                      @change="saveFilesOnEdit()"
+                    />
+                    <label class="custom-file-label" for="files-on-edit">{{
+                    fileOnEditUploadLabel()
+                    }}</label>
+                  </div>
+                  <button
+                    class="fas fa-plus"
+                    :class="{ disabled: !filesOnEdit.length }"
+                    title="Upload file"
+                    @click="insertNewFloorPlanFile(selectedFloorPlan.id)"
+                    :disabled="!filesOnEdit.length"
+                  ></button>
+                </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </transition>
@@ -531,6 +937,7 @@ export default {
     return {
       notifMessage: "",
       notifType: "",
+      notifCounter: 0,
       columns: [],
       floorPlans: [],
       perPage: ["10", "25", "50", "100"],
@@ -543,6 +950,7 @@ export default {
       houseImages: [],
       floorPlanImages: [],
       files: [],
+      filesOnEdit: [],
       excludedColumns: [
         "id", 
         "house_image", 
@@ -594,7 +1002,6 @@ export default {
       firstFloorPlanCall: true,
       selectedFloorPlan: null,
       isSearching: true,
-      notifCounter: 0,
       previousValue: null,
       pagination: {
         lastPage: "",
@@ -607,10 +1014,17 @@ export default {
         from: "",
         to: "",
       },
+      editTooltip: "Click to enable editing",
+      isEditing: false,
       houseImageShow: true,
       floorPlanImageShow: true,
       fileShow: true,
+      fileOnEditShow: true,
       showPreview: false,
+      newHouseImage: null,
+      newFloorPlanImage: null,
+      newHouseImagePreview: null,
+      newFloorPlanImagePreview: null,
     };
   },
   mounted() {
@@ -643,6 +1057,15 @@ export default {
           if (this.tableData.requestCounter == data.requestCounter) {
             this.floorPlans = data.data.data;
             this.configPagination(data.data);
+
+            //format column numbers to be proper number
+            this.floorPlans.forEach((floorPlan, floorKey) => {
+              Object.entries(floorPlan).forEach(([key, val]) => {
+                if(this.numberDotColumns.includes(key)){
+                  this.floorPlans[floorKey][key] = this.numberComma(val);
+                }
+              });
+            });
 
             //set slider max value on first call
             if(this.firstFloorPlanCall) {
@@ -716,9 +1139,9 @@ export default {
         });
       }
 
-      for (var pair of formData.entries()) {
-        console.log(pair[0] + ", " + pair[1]);
-      }
+      // for (var pair of formData.entries()) {
+      //   console.log(pair[0] + ", " + pair[1]);
+      // }
 
       const config = {
         header: {
@@ -784,6 +1207,7 @@ export default {
     },
     closePreview() {
       this.showPreview = false;
+      this.filesOnEdit = [];
     },
     updateFloorPlan(id, key, value, url = "/update-floor-plan") {
       value = value === '' ? null : value; 
@@ -844,6 +1268,222 @@ export default {
       for (var i = 0; i < this.$refs.files.files.length; i++) {
         this.files.push(this.$refs.files.files[i]);
       }
+    },
+    saveFilesOnEdit() {
+      this.filesOnEdit = [];
+      for (var i = 0; i < this.$refs.filesOnEdit.files.length; i++) {
+        this.filesOnEdit.push(this.$refs.filesOnEdit.files[i]);
+      }
+    },
+    deleteHouseImage(id, index, url = "/delete-house-image") {
+      if (confirm("Are you sure you want to remove this house image?")) {
+        axios
+          .post(url, { id: id })
+          .then((response) => {
+            if (response) {
+              this.notifMessage = response.data.notifMessage;
+              this.notifType = response.data.notifType;
+              this.notifCounter++;
+
+              if (response.data.notifType == "success") {
+                this.selectedFloorPlan.house_image.splice(index, 1);
+              }
+            }
+          })
+          .catch((errors) => {
+            this.notifMessage =
+              "Error encountered while deleting house image.";
+            this.notifType = "error";
+            this.notifCounter++;
+          });
+      }
+    },
+    deleteFloorPlanImage(id, index, url = "/delete-floor-plan-image") {
+      if (confirm("Are you sure you want to remove this floor plan image?")) {
+        axios
+          .post(url, { id: id })
+          .then((response) => {
+            if (response) {
+              this.notifMessage = response.data.notifMessage;
+              this.notifType = response.data.notifType;
+              this.notifCounter++;
+
+              if (response.data.notifType == "success") {
+                this.selectedFloorPlan.floor_plan_image.splice(index, 1);
+              }
+            }
+          })
+          .catch((errors) => {
+            this.notifMessage =
+              "Error encountered while deleting floor plan image.";
+            this.notifType = "error";
+            this.notifCounter++;
+          });
+      }
+    },
+    selectNewHouseImage() {
+      let newImage = this.$refs.newHouseImage.files[0];
+      this.newHouseImage = newImage;
+
+      if (newImage) {
+        var newPreview = URL.createObjectURL(newImage);
+
+        this.newHouseImagePreview = newPreview;
+      }
+    },
+    cancelNewHouseImage() {
+      this.newHouseImage = null;
+      this.newHouseImagePreview = null;
+    },
+    insertNewHouseImage(floorPlanId, url = "/insert-house-image") {
+      let formData = new FormData();
+
+      formData.append("newHouseImage", this.newHouseImage);
+      formData.append("floorPlanId", floorPlanId);
+
+      const config = {
+        header: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      axios
+        .post(url, formData, config)
+        .then(response => {
+          let data = response.data;
+
+          this.notifMessage = data.notifMessage;
+          this.notifType = data.notifType;
+          this.notifCounter++;
+
+          if (data.notifType == "success") {
+            let tempObj = {};
+            tempObj["id"] = data.newHouseImageId;
+            tempObj["title"] = data.newHouseImage;
+            this.selectedFloorPlan.house_image.push(tempObj);
+            this.cancelNewHouseImage();
+          }
+        })
+        .catch(errors => {
+          this.notifMessage = "Error encountered while inserting new house image.";
+          this.notifType = "error";
+          this.notifCounter++;
+        });
+    },
+    selectNewFloorPlanImage() {
+      let newImage = this.$refs.newFloorPlanImage.files[0];
+      this.newFloorPlanImage = newImage;
+
+      if (newImage) {
+        var newPreview = URL.createObjectURL(newImage);
+
+        this.newFloorPlanImagePreview = newPreview;
+      }
+    },
+    cancelNewFloorPlanImage() {
+        this.newFloorPlanImage = null;
+        this.newFloorPlanImagePreview = null;
+    },
+    insertNewFloorPlanImage(floorPlanId, url = "/insert-floor-plan-image") {
+      let formData = new FormData();
+
+      formData.append("newFloorPlanImage", this.newFloorPlanImage);
+      formData.append("floorPlanId", floorPlanId);
+
+      const config = {
+        header: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      axios
+        .post(url, formData, config)
+        .then(response => {
+          let data = response.data;
+
+          this.notifMessage = data.notifMessage;
+          this.notifType = data.notifType;
+          this.notifCounter++;
+
+          if (data.notifType == "success") {
+            let tempObj = {};
+            tempObj["id"] = data.newFloorPlanImageId;
+            tempObj["title"] = data.newFloorPlanImage;
+            this.selectedFloorPlan.floor_plan_image.push(tempObj);
+            this.cancelNewFloorPlanImage();
+          }
+        })
+        .catch(errors => {
+          this.notifMessage = "Error encountered while inserting new floor plan image.";
+          this.notifType = "error";
+          this.notifCounter++;
+        });
+    },
+    deleteNewFloorPlanFile(id, index, url = "/delete-floor-plan-file") {
+      if (confirm("Are you sure you want to remove this file?")) {
+        axios
+          .post(url, { id: id })
+          .then((response) => {
+            if (response) {
+              this.notifMessage = response.data.notifMessage;
+              this.notifType = response.data.notifType;
+              this.notifCounter++;
+
+              if (response.data.notifType == "success") {
+                this.selectedFloorPlan.file.splice(index, 1);
+              }
+            }
+          })
+          .catch((errors) => {
+            this.notifMessage =
+              "Error encountered while deleting file.";
+            this.notifType = "error";
+            this.notifCounter++;
+          });
+      }
+    },
+    insertNewFloorPlanFile(id, url = "/insert-floor-plan-file") {
+      let formData = new FormData();
+
+      formData.append("id", id);
+
+      this.filesOnEdit.forEach((file, index) => {
+        formData.append("files[" + index + "]", file);
+      });
+
+      const config = {
+        header: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      axios
+        .post(url, formData, config)
+        .then((response) => {
+          if (response) {
+            let data = response.data;
+
+            this.notifMessage = data.notifMessage;
+            this.notifType = data.notifType;
+            this.notifCounter++;
+
+            if (data.notifType == "success") {
+              data.newFiles.forEach((file, index) => {
+                let tempObj = {};
+                tempObj["id"] = data.newFilesId[index];
+                tempObj["title"] = file;
+                this.selectedFloorPlan.file.push(tempObj);
+              });
+
+              this.filesOnEdit = [];
+            }
+          }
+        })
+        .catch((errors) => {
+          this.notifMessage = "Error encountered while inserting new file.";
+          this.notifType = "error";
+          this.notifCounter++;
+        });
     },
     filterArray(array, excludedElements) {
       return array.filter((element) => !excludedElements.includes(element));
@@ -920,6 +1560,16 @@ export default {
       this.lengthMax = lengthMax > this.lengthMax ? lengthMax : this.lengthMax;
       this.widthMax = widthMax > this.widthMax ? widthMax : this.widthMax;
     },
+    toggleIsEditing() {
+      this.isEditing = !this.isEditing;
+
+      if(!this.isEditing) {
+        this.switchMode(true);
+        this.editTooltip = "Click to enable editing";
+      } else {
+        this.editTooltip = "Click to disable editing";
+      }
+    },
     switchMode(value) {
       this.isSearching = value;
       // this.$refs.firstCell[0].focus();
@@ -943,6 +1593,14 @@ export default {
     },
     fileUploadLabel() {
       let file = this.files;
+      return !file.length
+        ? "Choose file"
+        : file.length === 1
+        ? file[0].name
+        : file.length + " files selected";
+    },
+    fileOnEditUploadLabel() {
+      let file = this.filesOnEdit;
       return !file.length
         ? "Choose file"
         : file.length === 1

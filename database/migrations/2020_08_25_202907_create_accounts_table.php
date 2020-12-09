@@ -18,7 +18,11 @@ class CreateAccountsTable extends Migration
             $table->string('username');
             $table->string('password');
             $table->string('account_type');
+            $table->boolean('adss_content_manager_access')->default(0);
+            $table->boolean('floor_plan_access')->default(0);
+            $table->boolean('floor_plan_edit_privilege')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

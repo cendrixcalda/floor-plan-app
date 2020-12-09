@@ -199,4 +199,167 @@ class HomeController extends Controller
         
         return ["notifMessage" => $notifMessage, "notifType" => $notifType];
     }
+
+    public function deleteHouseImage(Request $request){
+        $id = $request->post('id');
+
+        $houseImage = HouseImage::findOrFail($id);
+        $floorPlanId = $houseImage->floor_plan_id;
+
+        $houseImageCount = HouseImage::where('floor_plan_id', $floorPlanId)->count();
+        if($houseImageCount <= 1) {
+            $notifMessage = "Cannot delete the last house image from this floor plan record. At least one house image is required for each floor plan record.";
+            $notifType = "warning";
+            return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+        }
+
+        try {
+            $houseImage->delete();
+            
+            $notifMessage = "House image was removed successfully.";
+            $notifType = "success";
+        } catch (Exception $ex) {
+            $notifMessage = $ex->getMessage();
+            $notifType = "error";
+        }
+        
+        return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+    }
+
+    public function postHouseImage(Request $request){
+        $data = $request->post();
+
+        if(!$request->hasfile('newHouseImage')) {
+            $notifMessage = "No image to be uploaded.";
+            $notifType = "error";
+            return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+        } else {
+            try {
+                $file = $request->file('newHouseImage');
+                $filename = time().'_'.$file->getClientOriginalName();
+                $file->move(public_path().'/images/house_images', $filename);
+
+                $newHouseImage = new HouseImage;
+                $newHouseImage->title = $filename;
+                $newHouseImage->floor_plan_id = $data['floorPlanId'];
+                $newHouseImage->save();
+
+                $notifMessage = "New house image was inserted.";
+                $notifType = "success";
+
+                return ["notifMessage" => $notifMessage, "notifType" => $notifType, "newHouseImage" => $filename, "newHouseImageId" => $newHouseImage->id];
+            } catch (Exception $ex) {
+                $notifMessage = "Error encountered when inserting new house image.";
+                $notifType = "error";
+
+                return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+            }
+        }
+    }
+
+    public function deleteFloorPlanImage(Request $request){
+        $id = $request->post('id');
+
+        $floorPlanImage = FloorPlanImage::findOrFail($id);
+        $floorPlanId = $floorPlanImage->floor_plan_id;
+
+        $floorPlanImageCount = FloorPlanImage::where('floor_plan_id', $floorPlanId)->count();
+        if($floorPlanImageCount <= 1) {
+            $notifMessage = "Cannot delete the last floor plan image from this floor plan record. At least one floor plan image is required for each floor plan record.";
+            $notifType = "warning";
+            return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+        }
+
+        try {
+            $floorPlanImage->delete();
+            
+            $notifMessage = "Floor plan image was removed successfully.";
+            $notifType = "success";
+        } catch (Exception $ex) {
+            $notifMessage = $ex->getMessage();
+            $notifType = "error";
+        }
+        
+        return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+    }
+
+    public function postFloorPlanImage(Request $request){
+        $data = $request->post();
+
+        if(!$request->hasfile('newFloorPlanImage')) {
+            $notifMessage = "No image to be uploaded.";
+            $notifType = "error";
+            return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+        } else {
+            try {
+                $file = $request->file('newFloorPlanImage');
+                $filename = time().'_'.$file->getClientOriginalName();
+                $file->move(public_path().'/images/floor_plan_images', $filename);
+
+                $newFloorPlanImage = new FloorPlanImage;
+                $newFloorPlanImage->title = $filename;
+                $newFloorPlanImage->floor_plan_id = $data['floorPlanId'];
+                $newFloorPlanImage->save();
+
+                $notifMessage = "New floor plan image was inserted.";
+                $notifType = "success";
+
+                return ["notifMessage" => $notifMessage, "notifType" => $notifType, "newFloorPlanImage" => $filename, "newFloorPlanImageId" => $newFloorPlanImage->id];
+            } catch (Exception $ex) {
+                $notifMessage = "Error encountered when inserting new floor plan image.";
+                $notifType = "error";
+
+                return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+            }
+        }
+    }
+
+    public function deleteFloorPlanFile(Request $request){
+        $id = $request->post('id');
+
+        try {
+            $floorPlanFile = File::findOrFail($id)->delete();
+            
+            $notifMessage = "File was removed successfully.";
+            $notifType = "success";
+        } catch (Exception $ex) {
+            $notifMessage = $ex->getMessage();
+            $notifType = "error";
+        }
+        
+        return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+    }
+
+    public function postFloorPlanFile(Request $request){
+        $data = $request->post();
+        $newFiles = [];
+        $newFilesId = [];
+
+        try {
+            if($request->hasfile('files')) {
+                foreach($request->file('files') as $fileKey => $fileFile) {
+                    $name = time().'_'.$fileFile->getClientOriginalName();
+                    $fileFile->move(public_path().'/files/', $name);
+
+                    $file = new File;
+                    $file->title = $name;
+                    $file->floor_plan_id = $data['id'];
+                    $file->save();
+
+                    $newFiles[] = $name;
+                    $newFilesId[] = $file->id;
+                }
+            }
+
+            $notifMessage = "New file was added successfully.";
+            $notifType = "success";
+
+            return ["notifMessage" => $notifMessage, "notifType" => $notifType, "newFiles" => $newFiles, "newFilesId" => $newFilesId];
+        } catch (Exception $ex) {
+            $notifMessage = $ex->getMessage();
+            $notifType = "error";
+            
+            return ["notifMessage" => $notifMessage, "notifType" => $notifType];
+        }
+    }
 }

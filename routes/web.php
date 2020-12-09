@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'HomeController@show');
 
+// Route::get('/login', 'LoginController@login');
+Route::group(['prefix' => 'login'], function() { 
+    Route::get('/', 'LoginController@login');
+    Route::post('/submit', 'LoginController@submit');
+});
+
 Route::group(['prefix' => 'home'], function() { 
     Route::get('/', 'HomeController@show');
 });
@@ -28,3 +34,10 @@ Route::get('get-floor-plans', 'HomeController@getFloorPlans');
 Route::post('insert-floor-plan', 'HomeController@postFloorPlan');
 Route::post('update-floor-plan', 'HomeController@putFloorPlan');
 Route::post('delete-floor-plan', 'HomeController@deleteFloorPlan');
+
+Route::post('delete-house-image', 'HomeController@deleteHouseImage');
+Route::post('insert-house-image', 'HomeController@postHouseImage');
+Route::post('delete-floor-plan-image', 'HomeController@deleteFloorPlanImage');
+Route::post('insert-floor-plan-image', 'HomeController@postFloorPlanImage');
+Route::post('delete-floor-plan-file', 'HomeController@deleteFloorPlanFile');
+Route::post('insert-floor-plan-file', 'HomeController@postFloorPlanFile');
