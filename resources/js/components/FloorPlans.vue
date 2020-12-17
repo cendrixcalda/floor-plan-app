@@ -432,7 +432,7 @@
             </button>
           </div>
         </div>
-        <div class="tools-right">
+        <div class="tools-right" v-if="floorPlanEditPrivilege">
           <div class="mode" v-show="isEditing">
             <button
               title="Switch to search mode"
@@ -933,8 +933,13 @@ export default {
     pagination: Pagination,
     "vue-slider": VueSlider,
   },
+  props: {
+      userAuth: Object,
+  },
   data() {
     return {
+      currentUrlSegment: "",
+      floorPlanEditPrivilege: null,
       notifMessage: "",
       notifType: "",
       notifCounter: 0,
@@ -1027,12 +1032,18 @@ export default {
       newFloorPlanImagePreview: null,
     };
   },
+  created() {
+    this.currentUrlSegment = window.location.pathname.split('/')[1];
+    if(this.userAuth) {
+      this.floorPlanEditPrivilege = this.userAuth.floor_plan_edit_privilege;
+    }
+  },
   mounted() {
     this.getFloorPlanColumns();
     let data = this.getFloorPlans();
   },
   methods: {
-    getFloorPlanColumns(url = "/get-floor-plan-columns") {
+    getFloorPlanColumns(url = this.currentUrlSegment+"/columns") {
       axios
         .get(url)
         .then((response) => {
@@ -1047,7 +1058,7 @@ export default {
           this.notifCounter++;
         });
     },
-    getFloorPlans(url = "/get-floor-plans") {
+    getFloorPlans(url = this.currentUrlSegment+"/data") {
       this.tableData.requestCounter++;
       this.objEmptyPropertyRemover(this.tableData.search);
       axios
@@ -1088,7 +1099,7 @@ export default {
           this.notifCounter++;
         });
     },
-    insertFloorPlan(url = "/insert-floor-plan") {
+    insertFloorPlan(url = this.currentUrlSegment+"/insert") {
       let formData = new FormData();
 
       // Insert data validations
@@ -1172,7 +1183,7 @@ export default {
           this.notifCounter++;
         });
     },
-    deleteFloorPlan(id, url = "/delete-floor-plan") {
+    deleteFloorPlan(id, url = this.currentUrlSegment+"/delete") {
       if (confirm("Are you sure you want to remove this floor plan?")) {
         axios
           .post(url, { id: id })
@@ -1209,7 +1220,7 @@ export default {
       this.showPreview = false;
       this.filesOnEdit = [];
     },
-    updateFloorPlan(id, key, value, url = "/update-floor-plan") {
+    updateFloorPlan(id, key, value, url = this.currentUrlSegment+"/update") {
       value = value === '' ? null : value; 
       if (value != this.previousValue) {
         //validations
@@ -1275,7 +1286,7 @@ export default {
         this.filesOnEdit.push(this.$refs.filesOnEdit.files[i]);
       }
     },
-    deleteHouseImage(id, index, url = "/delete-house-image") {
+    deleteHouseImage(id, index, url = this.currentUrlSegment+"/house-image/delete") {
       if (confirm("Are you sure you want to remove this house image?")) {
         axios
           .post(url, { id: id })
@@ -1298,7 +1309,7 @@ export default {
           });
       }
     },
-    deleteFloorPlanImage(id, index, url = "/delete-floor-plan-image") {
+    deleteFloorPlanImage(id, index, url = this.currentUrlSegment+"/floor-plan-image/delete") {
       if (confirm("Are you sure you want to remove this floor plan image?")) {
         axios
           .post(url, { id: id })
@@ -1335,7 +1346,7 @@ export default {
       this.newHouseImage = null;
       this.newHouseImagePreview = null;
     },
-    insertNewHouseImage(floorPlanId, url = "/insert-house-image") {
+    insertNewHouseImage(floorPlanId, url = this.currentUrlSegment+"/house-image/insert") {
       let formData = new FormData();
 
       formData.append("newHouseImage", this.newHouseImage);
@@ -1384,7 +1395,7 @@ export default {
         this.newFloorPlanImage = null;
         this.newFloorPlanImagePreview = null;
     },
-    insertNewFloorPlanImage(floorPlanId, url = "/insert-floor-plan-image") {
+    insertNewFloorPlanImage(floorPlanId, url = this.currentUrlSegment+"/floor-plan-image/insert") {
       let formData = new FormData();
 
       formData.append("newFloorPlanImage", this.newFloorPlanImage);
@@ -1419,7 +1430,7 @@ export default {
           this.notifCounter++;
         });
     },
-    deleteNewFloorPlanFile(id, index, url = "/delete-floor-plan-file") {
+    deleteNewFloorPlanFile(id, index, url = this.currentUrlSegment+"/floor-plan-file/delete") {
       if (confirm("Are you sure you want to remove this file?")) {
         axios
           .post(url, { id: id })
@@ -1442,7 +1453,7 @@ export default {
           });
       }
     },
-    insertNewFloorPlanFile(id, url = "/insert-floor-plan-file") {
+    insertNewFloorPlanFile(id, url = this.currentUrlSegment+"/floor-plan-file/insert") {
       let formData = new FormData();
 
       formData.append("id", id);
@@ -1572,8 +1583,6 @@ export default {
     },
     switchMode(value) {
       this.isSearching = value;
-      // this.$refs.firstCell[0].focus();
-      // this.$refs.firstCell[0].select();
     },
     houseImageUploadLabel() {
       let image = this.houseImages;

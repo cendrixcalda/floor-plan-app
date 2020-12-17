@@ -21,7 +21,7 @@
     </head>
     <body>
         <div id="app">
-            <nav-bar></nav-bar>
+            <nav-bar :user-auth="{{ Auth::user() }}"></nav-bar>
             @yield('content')
         </div>
         

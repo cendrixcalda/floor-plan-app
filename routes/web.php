@@ -13,31 +13,109 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'HomeController@show');
-
-// Route::get('/login', 'LoginController@login');
-Route::group(['prefix' => 'login'], function() { 
-    Route::get('/', 'LoginController@login');
-    Route::post('/submit', 'LoginController@submit');
+Route::group(['middleware' => ['auth', 'floorplan.access']], function() {
+    Route::get('/', function(){
+    	return redirect('/floorplans');	
+    });
 });
 
-Route::group(['prefix' => 'home'], function() { 
-    Route::get('/', 'HomeController@show');
+Route::group(['prefix' => 'login'], function() {
+    Route::get('/', [
+        'uses' => 'LoginController@login',
+        'as' => 'login',
+    ]);
+    Route::post('/submit', [
+        'uses' => 'LoginController@submit',
+        'as' => 'login.submit',
+    ]);
 });
 
-Route::group(['prefix' => 'user-management'], function() { 
-    Route::get('/', 'UserController@show');
+Route::group(['middleware' => 'auth', 'prefix' => 'logout'], function() {
+    Route::get('/', [
+        'uses' => 'LoginController@logout',
+        'as' => 'logout',
+    ]);
 });
 
-Route::get('get-floor-plan-columns', 'HomeController@getFloorPlanColumns');
-Route::get('get-floor-plans', 'HomeController@getFloorPlans');
-Route::post('insert-floor-plan', 'HomeController@postFloorPlan');
-Route::post('update-floor-plan', 'HomeController@putFloorPlan');
-Route::post('delete-floor-plan', 'HomeController@deleteFloorPlan');
+Route::group(['middleware' => ['auth', 'floorplan.access'], 'prefix' => 'floorplans'], function() {
+    Route::get('/', [
+        'uses' => 'FloorPlanController@show',
+        'as' => 'floorplans',
+    ]);
 
-Route::post('delete-house-image', 'HomeController@deleteHouseImage');
-Route::post('insert-house-image', 'HomeController@postHouseImage');
-Route::post('delete-floor-plan-image', 'HomeController@deleteFloorPlanImage');
-Route::post('insert-floor-plan-image', 'HomeController@postFloorPlanImage');
-Route::post('delete-floor-plan-file', 'HomeController@deleteFloorPlanFile');
-Route::post('insert-floor-plan-file', 'HomeController@postFloorPlanFile');
+    Route::get('/columns', [
+        'uses' => 'FloorPlanController@getColumns',
+        'as' => 'floorplans.columns',
+    ]);
+    Route::get('/data', [
+        'uses' => 'FloorPlanController@getFloorPlans',
+        'as' => 'floorplans.data',
+    ]);
+
+    Route::group(['middleware' => 'floorplan.edit'], function() {
+        Route::post('/insert', [
+            'uses' => 'FloorPlanController@postFloorPlan',
+            'as' => 'floorplans.insert',
+        ]);
+        Route::post('/update', [
+            'uses' => 'FloorPlanController@putFloorPlan',
+            'as' => 'floorplans.update',
+        ]);
+        Route::post('/delete', [
+            'uses' => 'FloorPlanController@deleteFloorPlan',
+            'as' => 'floorplans.delete',
+        ]);
+    
+        Route::post('/house-image/insert', [
+            'uses' => 'FloorPlanController@postHouseImage',
+            'as' => 'floorplans.houseimage.insert',
+        ]);
+        Route::post('/house-image/delete', [
+            'uses' => 'FloorPlanController@deleteHouseImage',
+            'as' => 'floorplans.houseimage.delete',
+        ]);
+        Route::post('/floor-plan-image/insert', [
+            'uses' => 'FloorPlanController@postFloorPlanImage',
+            'as' => 'floorplans.floorplanimage.insert',
+        ]);
+        Route::post('/floor-plan-image/delete', [
+            'uses' => 'FloorPlanController@deleteFloorPlanImage',
+            'as' => 'floorplans.floorplanimage.delete',
+        ]);
+        Route::post('/floor-plan-file/insert', [
+            'uses' => 'FloorPlanController@postFloorPlanFile',
+            'as' => 'floorplans.floorplanfile.insert',
+        ]);
+        Route::post('/floor-plan-file/delete', [
+            'uses' => 'FloorPlanController@deleteFloorPlanFile',
+            'as' => 'floorplans.floorplanfile.delete',
+        ]);
+    });
+});
+
+Route::group(['middleware' => ['auth', 'users.access'], 'prefix' => 'users'], function() { 
+    Route::get('/', [
+        'uses' => 'UserController@show',
+        'as' => 'users',
+    ]);
+    Route::get('/columns', [
+        'uses' => 'UserController@getColumns',
+        'as' => 'users.columns',
+    ]);
+    Route::get('/data', [
+        'uses' => 'UserController@getUsers',
+        'as' => 'users.data',
+    ]);
+    Route::post('/insert', [
+        'uses' => 'UserController@postUser',
+        'as' => 'users.insert',
+    ]);
+    Route::post('/update', [
+        'uses' => 'UserController@putUser',
+        'as' => 'users.update',
+    ]);
+    Route::post('/delete', [
+        'uses' => 'UserController@deleteUser',
+        'as' => 'users.delete',
+    ]);
+});

@@ -9,13 +9,13 @@ use App\HouseImage;
 use App\FloorPlanImage;
 use App\File;
 
-class HomeController extends Controller
+class FloorPlanController extends Controller
 {
     public function show(Request $request){
-        return view('home');
+        return view('floorplan');
     }
 
-    public function getFloorPlanColumns(){
+    public function getColumns(){
         $columns = Schema::getColumnListing('floor_plans');
 
         return json_encode($columns);
@@ -351,7 +351,7 @@ class HomeController extends Controller
                 }
             }
 
-            $notifMessage = "New file was added successfully.";
+            $notifMessage = "New file/s was added successfully.";
             $notifType = "success";
 
             return ["notifMessage" => $notifMessage, "notifType" => $notifType, "newFiles" => $newFiles, "newFilesId" => $newFilesId];

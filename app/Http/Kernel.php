@@ -63,5 +63,10 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+
+        'users.access' => \App\Http\Middleware\HasUsersAccess::class,
+        'adsscm.access' => \App\Http\Middleware\HasAdssContentManagerAccess::class,
+        'floorplan.access' => \App\Http\Middleware\HasFloorPlanAccess::class,
+        'floorplan.edit' => \App\Http\Middleware\HasFloorPlanEditPrivilege::class,
     ];
 }

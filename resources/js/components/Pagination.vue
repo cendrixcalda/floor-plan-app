@@ -12,7 +12,7 @@
     justify-content: flex-start;
     width: 90%;
 
-    .page-stats {
+    .page-stats, .page-row {
       align-items: center;
       padding: 5px;
       margin-right: 10px;

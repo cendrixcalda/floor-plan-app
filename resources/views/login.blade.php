@@ -21,7 +21,12 @@
     </head>
     <body>
         <div id="app">
-            <login></login>
+            @if (session()->get('notifMessage') && session()->get('notifType'))
+                <login :username-prop="{{ json_encode(session()->get('username')) }}" :password-prop="{{ json_encode(session()->get('password')) }}" :notif-message-prop="{{ json_encode(session()->get('notifMessage')) }}" :notif-type-prop="{{ json_encode(session()->get('notifType')) }}"></login>
+            @else
+                <login></login>
+            @endif
+            
         </div>
         
         <!-- Scripts -->
